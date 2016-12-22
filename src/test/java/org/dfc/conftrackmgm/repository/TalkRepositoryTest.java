@@ -1,33 +1,56 @@
 package org.dfc.conftrackmgm.repository;
 
 import org.dfc.conftrackmgm.model.Talk;
-import org.junit.Before;
+import org.dfc.conftrackmgm.model.TalkState;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.net.URL;
-import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class TalkRepositoryTest {
-    private static final String TEST_FILE = "input.txt";
+    @Autowired
     private TalkRepository sut;
 
-    @Before
-    public void setUp() throws Exception {
-        sut = new TalkRepository();
+    @Test
+    public void getTalks() throws Exception {
+        assertThat(sut.getTalks().size(), is(19));
     }
 
     @Test
-    public void getTalksFromFile() throws Exception {
-        URL resource = getClass().getClassLoader().getResource(TEST_FILE);
-        List<Talk> talks = sut.getTalksFromFile(resource.toURI().getPath());
-        assertThat(talks.size(), is(19));
+    public void getNotScheduledTalks() throws Exception {
+        assertThat(sut.getNotScheduledTalks().size(), is(19));
+    }
+
+    @Test
+    public void findNotScheduledTalkByMinutes() throws Exception {
+        Optional<Talk> talk = sut.findNotScheduledTalkByMinutes(60);
+        assertThat(talk.get().getDuration(), is(60));
+    }
+
+    @Test
+    public void resetTalksStateAndShuffleListTestShuffle() throws Exception {
+        Talk firstTalkElementBeforeShuffle = sut.getTalks().get(0);
+        sut.resetTalksStateAndShuffleList();
+        Talk firstTalkElementAfterShuffle = sut.getTalks().get(0);
+
+        assertThat(firstTalkElementBeforeShuffle.getTitle(), not(firstTalkElementAfterShuffle.getTitle()));
+    }
+
+    @Test
+    public void resetTalksStateAndShuffleListTestResetState() throws Exception {
+        Talk talkElement = sut.getTalks().get(0);
+        talkElement.setState(TalkState.SCHEDULED);
+        sut.resetTalksStateAndShuffleList();
+
+        assertThat(talkElement.getState(), is(TalkState.NOT_SCHEDULED));
     }
 }
