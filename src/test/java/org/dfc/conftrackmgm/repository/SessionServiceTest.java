@@ -2,7 +2,6 @@ package org.dfc.conftrackmgm.repository;
 
 import org.dfc.conftrackmgm.model.Session;
 import org.dfc.conftrackmgm.service.SessionService;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +16,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class SessionServiceTest {
     @Autowired
     private SessionService sut;
-
-    @Before
-    public void setUp() throws Exception {
-    }
 
     @Test
     public void fillMorningSessionWithTalks() throws Exception {
