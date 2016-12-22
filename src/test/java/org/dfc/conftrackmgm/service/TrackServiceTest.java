@@ -1,7 +1,6 @@
-package org.dfc.conftrackmgm.repository;
+package org.dfc.conftrackmgm.service;
 
 import org.dfc.conftrackmgm.model.Track;
-import org.dfc.conftrackmgm.service.TrackService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

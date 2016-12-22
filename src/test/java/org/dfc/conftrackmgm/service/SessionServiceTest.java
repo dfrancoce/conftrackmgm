@@ -1,7 +1,6 @@
-package org.dfc.conftrackmgm.repository;
+package org.dfc.conftrackmgm.service;
 
 import org.dfc.conftrackmgm.model.Session;
-import org.dfc.conftrackmgm.service.SessionService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
