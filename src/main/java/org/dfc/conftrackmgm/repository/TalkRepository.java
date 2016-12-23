@@ -2,6 +2,8 @@ package org.dfc.conftrackmgm.repository;
 
 import org.dfc.conftrackmgm.model.Talk;
 import org.dfc.conftrackmgm.model.TalkState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +19,7 @@ import java.util.stream.Stream;
 
 @Repository
 public class TalkRepository {
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private static final String LIGHTNING_TALK = "lightning";
     private List<Talk> talks;
 
@@ -38,7 +41,7 @@ public class TalkRepository {
                 talk.ifPresent(talks::add);
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("An error occurred trying to extract the talks from the input file: ", e);
         }
     }
 

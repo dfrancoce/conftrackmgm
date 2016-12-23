@@ -25,6 +25,7 @@ public class TrackServiceTest {
     public void createTracks() throws Exception {
         List<Track> tracks = sut.createTracks();
         assertThat(tracks.size(), not(0));
+
         final AtomicInteger numOfTracks = new AtomicInteger(1);
         tracks.forEach(track -> {
             System.out.printf("Track %d:\n", numOfTracks.get());

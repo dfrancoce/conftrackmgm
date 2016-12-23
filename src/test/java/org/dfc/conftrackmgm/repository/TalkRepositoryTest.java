@@ -38,14 +38,6 @@ public class TalkRepositoryTest {
     }
 
     @Test
-    @DirtiesContext
-    public void remove() throws Exception {
-        sut.remove(sut.getTalks());
-        assertThat(sut.getTalks().size(), is(0));
-    }
-
-    @Test
-    @DirtiesContext
     public void resetTalksStateAndShuffleListTestShuffle() throws Exception {
         Talk firstTalkElementBeforeShuffle = sut.getTalks().get(0);
         sut.resetTalksStateAndShuffleList();
@@ -55,12 +47,18 @@ public class TalkRepositoryTest {
     }
 
     @Test
-    @DirtiesContext
     public void resetTalksStateAndShuffleListTestResetState() throws Exception {
         Talk talkElement = sut.getTalks().get(0);
         talkElement.setState(TalkState.SCHEDULED);
         sut.resetTalksStateAndShuffleList();
 
         assertThat(talkElement.getState(), is(TalkState.NOT_SCHEDULED));
+    }
+
+    @Test
+    @DirtiesContext
+    public void remove() throws Exception {
+        sut.remove(sut.getTalks());
+        assertThat(sut.getTalks().size(), is(0));
     }
 }

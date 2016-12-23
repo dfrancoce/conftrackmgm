@@ -2,6 +2,8 @@ package org.dfc.conftrackmgm.service;
 
 import org.dfc.conftrackmgm.model.Track;
 import org.dfc.conftrackmgm.repository.TalkRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,7 @@ import java.util.*;
 
 @Service
 public class TrackService {
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private static final String MORNING_START_DATE = "09:00 AM";
     private static final String AFTERNOON_START_DATE = "01:00 PM";
 
@@ -76,7 +79,7 @@ public class TrackService {
             calendarOptional = Optional.of(Calendar.getInstance());
             calendarOptional.get().setTime(startDate);
         } catch (ParseException e) {
-            e.printStackTrace();
+            LOGGER.error("An error occurred trying to parse the date " + time, e);
         }
 
         return calendarOptional;
