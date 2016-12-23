@@ -20,7 +20,7 @@ public class SessionService {
      * @param session Session to be filled
      * @param sessionMinutes Duration of the session in minutes
      */
-    public void fillSessionWithTalks(Session session, int sessionMinutes) {
+    public void fillSessionWithTalks(final Session session, int sessionMinutes) {
         int totalSessionTalksMinutes = 0;
         final List<Talk> talks = repository.getNotScheduledTalks();
 

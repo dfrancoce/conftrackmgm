@@ -39,6 +39,13 @@ public class TalkRepositoryTest {
 
     @Test
     @DirtiesContext
+    public void remove() throws Exception {
+        sut.remove(sut.getTalks());
+        assertThat(sut.getTalks().size(), is(0));
+    }
+
+    @Test
+    @DirtiesContext
     public void resetTalksStateAndShuffleListTestShuffle() throws Exception {
         Talk firstTalkElementBeforeShuffle = sut.getTalks().get(0);
         sut.resetTalksStateAndShuffleList();

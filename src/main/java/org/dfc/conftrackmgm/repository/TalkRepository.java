@@ -2,6 +2,7 @@ package org.dfc.conftrackmgm.repository;
 
 import org.dfc.conftrackmgm.model.Talk;
 import org.dfc.conftrackmgm.model.TalkState;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -17,20 +18,19 @@ import java.util.stream.Stream;
 @Repository
 public class TalkRepository {
     private static final String LIGHTNING_TALK = "lightning";
-    private static final String INPUT_FILE = "input.txt";
     private List<Talk> talks;
+
+    @Value("${inputFile}")
+    private String inputFile;
 
     @PostConstruct
     public void init() {
         getTalksFromFile();
     }
 
-    /**
-     * Extracts the talks from the input file
-     */
     private void getTalksFromFile() {
         talks = new ArrayList<>();
-        URL resource = getClass().getClassLoader().getResource(INPUT_FILE);
+        URL resource = getClass().getClassLoader().getResource(inputFile);
 
         try (Stream<String> stream = Files.lines(Paths.get(resource.toURI().getPath()))) {
             stream.forEach(t -> {
@@ -42,11 +42,6 @@ public class TalkRepository {
         }
     }
 
-    /**
-     * Extracts the talk (Title and duration) from a line of the input file
-     * @param line
-     * @return The Talk stored in the line
-     */
     private Optional<Talk> getTalkFromLine(final String line) {
         String pattern = "[^0-9]*([0-9]+).*";
         Matcher m = Pattern.compile(pattern).matcher(line);
@@ -80,13 +75,29 @@ public class TalkRepository {
         Collections.shuffle(talks, new Random(System.nanoTime()));
     }
 
+    /**
+     * Get all talks
+     * @return List of talks
+     */
     public List<Talk> getTalks() {
         return talks;
     }
 
+    /**
+     * Retrieves the talks with a NOT_SCHEDULED state
+     * @return List of NOT_SCHEDULED talks
+     */
     public List<Talk> getNotScheduledTalks() {
         return talks.stream()
                 .filter(talk -> talk.getState().equals(TalkState.NOT_SCHEDULED))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Removes the sublist of talks passed by parameter
+     * @param talksToRemove Sublist to be removed
+     */
+    public void remove(List<Talk> talksToRemove) {
+        talks.removeAll(talksToRemove);
     }
 }
