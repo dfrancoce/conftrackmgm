@@ -12,42 +12,65 @@ import java.util.Optional;
 
 @Service
 public class SessionService {
+    private final TalkRepository repository;
+
     @Autowired
-    private TalkRepository repository;
+    public SessionService(TalkRepository repository) {
+        this.repository = repository;
+    }
 
     /**
      * Fills a session with the talks retrieved from the input file
      * @param session Session to be filled
      * @param sessionMinutes Duration of the session in minutes
      */
-    public void fillSessionWithTalks(final Session session, int sessionMinutes) {
-        int totalSessionTalksMinutes = 0;
+    void fillSessionWithTalks(final Session session, int sessionMinutes) {
+        int totalMinutes = 0;
         final List<Talk> talks = repository.getNotScheduledTalks();
 
         for (Talk talk : talks) {
-            int sessionLeftMinutes = sessionMinutes - totalSessionTalksMinutes;
-            if (sessionLeftMinutes == 0) break;
+            int minutesLeft = getMinutesLeft(sessionMinutes, totalMinutes);
+            if (minutesLeft == 0) break;
 
-            if (sessionLeftMinutes + talk.getDuration() > 0
-                    && totalSessionTalksMinutes + talk.getDuration() <= sessionMinutes) {
-                 totalSessionTalksMinutes += talk.getDuration();
-                 talk.setState(TalkState.SCHEDULED);
-                 session.addTalk(talk);
+            if (canAddAnotherTalkToSession(talk, sessionMinutes, totalMinutes, minutesLeft)) {
+                totalMinutes = addTalkToSession(session, totalMinutes, talk);
             } else {
-                sessionLeftMinutes = Math.abs(sessionLeftMinutes);
-                Optional<Talk> talkOptional = repository.findNotScheduledTalkByMinutes(sessionLeftMinutes);
+                Optional<Talk> talkOptional = getNotScheduledTalk(minutesLeft);
 
                 if (talkOptional.isPresent()) {
-                    totalSessionTalksMinutes += talkOptional.get().getDuration();
-                    talkOptional.get().setState(TalkState.SCHEDULED);
-                    session.addTalk(talkOptional.get());
+                    totalMinutes = addTalkToSession(session, totalMinutes, talkOptional.get());
                 } else {
-                    repository.resetTalksStateAndShuffleList();
-                    session.clearTalks();
+                    resetAndClearTalks(session);
                     fillSessionWithTalks(session, sessionMinutes);
                     return;
                 }
             }
         }
+    }
+
+    private void resetAndClearTalks(Session session) {
+        repository.resetTalksStateAndShuffleList();
+        session.clearTalks();
+    }
+
+    private Optional<Talk> getNotScheduledTalk(int minutesLeft) {
+        minutesLeft = Math.abs(minutesLeft);
+        return repository.findNotScheduledTalkByMinutes(minutesLeft);
+    }
+
+    private int addTalkToSession(final Session session, int totalMinutes, final Talk talk) {
+        totalMinutes += talk.getDuration();
+        talk.setState(TalkState.SCHEDULED);
+        session.addTalk(talk);
+
+        return totalMinutes;
+    }
+
+    private boolean canAddAnotherTalkToSession(final Talk talk, int sessionMinutes, int totalMinutes, int minutesLeft) {
+        return minutesLeft + talk.getDuration() > 0 && totalMinutes + talk.getDuration() <= sessionMinutes;
+    }
+
+    private int getMinutesLeft(int sessionMinutes, int totalMinutes) {
+        return sessionMinutes - totalMinutes;
     }
 }

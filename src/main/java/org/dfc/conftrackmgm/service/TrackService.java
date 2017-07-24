@@ -16,18 +16,21 @@ public class TrackService {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private static final String MORNING_START_DATE = "09:00 AM";
     private static final String AFTERNOON_START_DATE = "01:00 PM";
+    private final SessionService sessionService;
+    private final TalkRepository talkRepository;
 
     @Autowired
-    private SessionService sessionService;
-    @Autowired
-    private TalkRepository talkRepository;
+    public TrackService(SessionService sessionService, TalkRepository talkRepository) {
+        this.sessionService = sessionService;
+        this.talkRepository = talkRepository;
+    }
 
     /**
      * Creates the tracks from the talks
      * @return List of Tracks
      */
-    public List<Track> createTracks() {
-        List<Track> tracks = new ArrayList<>();
+    List<Track> createTracks() {
+        final List<Track> tracks = new ArrayList<>();
         while (talkRepository.getNotScheduledTalks().size() > 0) {
             tracks.add(createTrack());
         }
@@ -37,13 +40,21 @@ public class TrackService {
     }
 
     private Track createTrack() {
-        Track track = new Track();
-        sessionService.fillSessionWithTalks(track.getMorningSession(), 180);
-        talkRepository.remove(track.getMorningSession().getTalks());
-        sessionService.fillSessionWithTalks(track.getAfternoonSession(), 240);
-        talkRepository.remove(track.getAfternoonSession().getTalks());
+        final Track track = new Track();
+        fillTrackWithMorningSessions(track);
+        fillTrackWithAfternoonSessions(track);
 
         return track;
+    }
+
+    private void fillTrackWithMorningSessions(final Track track) {
+        sessionService.fillSessionWithTalks(track.getMorningSession(), 180);
+        talkRepository.remove(track.getMorningSession().getTalks());
+    }
+
+    private void fillTrackWithAfternoonSessions(final Track track) {
+        sessionService.fillSessionWithTalks(track.getAfternoonSession(), 240);
+        talkRepository.remove(track.getAfternoonSession().getTalks());
     }
 
     private void setTimesToTracksTalks(List<Track> tracks) {
@@ -74,8 +85,8 @@ public class TrackService {
     private Optional<Calendar> getCalendar(String time) {
         Optional<Calendar> calendarOptional = Optional.empty();
         try {
-            SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a");
-            Date startDate = formatter.parse(time);
+            final SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a");
+            final Date startDate = formatter.parse(time);
             calendarOptional = Optional.of(Calendar.getInstance());
             calendarOptional.get().setTime(startDate);
         } catch (ParseException e) {
